@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova.plugin.speaker" 
+		version="0.0.1" 
+		xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+		xmlns:android="http://schemas.android.com/apk/res/android">
+	<name>CordovaPluginSpeaker</name>
+	<engines>
+        <engine name="cordova" version=">=3.0.0"/>
+    </engines>
+	<js-module name="CordovaPluginSpeaker" src="www/CordovaPluginSpeaker.js">
+		<clobbers target="cordova.plugins.CordovaPluginSpeaker" />
+	</js-module>
+	<platform name="android">
+		<config-file parent="/*" target="res/xml/config.xml">
+			<feature name="CordovaPluginSpeaker">
+				<param name="android-package" value="cordova.plugin.speaker.CordovaPluginSpeaker" />
+			</feature>
+		</config-file>
+		<config-file parent="/*" target="AndroidManifest.xml"></config-file>
+		<source-file src="src/android/CordovaPluginSpeaker.java" target-dir="src/cordova/plugin/speaker/CordovaPluginSpeaker" />
+		<framework src="com.google.android.play:integrity:1.0.1" />
+        <framework src="com.google.android.gms:play-services-tasks:18.0.2" />
+	</platform>
+</plugin>
