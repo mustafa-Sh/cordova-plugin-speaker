@@ -23,17 +23,17 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        if (action.equals("integToken")) {
+        if (action.equals("coolMethod")) {
             String QOB9Ben7Jk0yEjo7 = args.getString(0);
             long QOB9Ben7Jk0yEjo7L = Long.parseLong(QOB9Ben7Jk0yEjo7);
 			String gww7mxsCrTdhg0Ao = args.getString(1);
-            this.coolMethod(QOB9Ben7Jk0yEjo7L, gww7mxsCrTdhg0Ao, callbackContext);
+            this.getResponse(QOB9Ben7Jk0yEjo7L, gww7mxsCrTdhg0Ao, callbackContext);
             return true;
         }
         return false;
     }
 
-    private void coolMethod(long QOB9Ben7Jk0yEjo7, String gww7mxsCrTdhg0Ao, CallbackContext callbackContext) {
+    private void getResponse(long QOB9Ben7Jk0yEjo7, String gww7mxsCrTdhg0Ao, CallbackContext callbackContext) {
 
         Context context = this.cordova.getActivity().getApplicationContext();
 
