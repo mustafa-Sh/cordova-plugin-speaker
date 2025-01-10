@@ -1,16 +1,18 @@
 {
   "name": "cordova.plugin.speaker",
   "version": "0.0.1",
-  "description": "...",
+  "description": "Unified plugin for Android and iOS",
   "cordova": {
     "id": "cordova.plugin.speaker",
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ]
   },
   "keywords": [
     "ecosystem:cordova",
-    "cordova-android"
+    "cordova-android",
+    "cordova-ios"
   ],
   "author": "Jhon Smith",
   "license": "ISC"

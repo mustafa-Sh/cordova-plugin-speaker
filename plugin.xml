@@ -21,4 +21,12 @@
 		<framework src="com.google.android.play:integrity:1.0.1" />
         <framework src="com.google.android.gms:play-services-tasks:18.0.2" />
 	</platform>
+	<platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="CordovaPluginIos">
+                <param name="ios-package" value="CordovaPluginIos" />
+            </feature>
+        </config-file>
+        <source-file src="src/ios/CordovaPluginIos.m" />
+    </platform>
 </plugin>
