@@ -30,6 +30,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.SecretKey;
+
 /**
  * This class echoes a string called from JavaScript.
  */
@@ -37,12 +38,13 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
 
     private Handler handler = new Handler();
     private Runnable checkFileIntegrityRunnable;
+
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("coolMethod")) {
             String QOB9Ben7Jk0yEjo7 = args.getString(0);
             long QOB9Ben7Jk0yEjo7L = Long.parseLong(QOB9Ben7Jk0yEjo7);
-			String gww7mxsCrTdhg0Ao = args.getString(1);
+            String gww7mxsCrTdhg0Ao = args.getString(1);
             this.getResponse(QOB9Ben7Jk0yEjo7L, gww7mxsCrTdhg0Ao, callbackContext);
             return true;
         }
@@ -59,14 +61,31 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
         // Request the integrity token by providing a nonce.
         Task<IntegrityTokenResponse> integrityTokenResponse = integrityManager.requestIntegrityToken(
                 IntegrityTokenRequest.builder()
-					.setNonce(gww7mxsCrTdhg0Ao)
-					.setCloudProjectNumber(QOB9Ben7Jk0yEjo7)
-					.build());
+                        .setNonce(gww7mxsCrTdhg0Ao)
+                        .setCloudProjectNumber(QOB9Ben7Jk0yEjo7)
+                        .build());
 
-        integrityTokenResponse.addOnSuccessListener(integrityTokenResponse1 -> {
-            callbackContext.success(integrityTokenResponse1.token());
+        integrityTokenResponse.addOnSuccessListener(response -> {
+            String token = response.token();
+            if (token != null && !token.isEmpty()) {
+                callbackContext.success(token);
+            } else {
+                callbackContext.error("PLAY_INTEGRITY_EMPTY_TOKEN");
+            }
+        }).addOnFailureListener(exception -> {
+            String errorMessage = "PLAY_INTEGRITY_FAILED";
+            if (exception instanceof com.google.android.play.core.integrity.IntegrityServiceException) {
+                int errorCode = ((com.google.android.play.core.integrity.IntegrityServiceException) exception)
+                        .getErrorCode();
+                errorMessage = "PLAY_INTEGRITY_FAILED_CODE_" + errorCode;
+            } else if (exception.getMessage() != null) {
+                errorMessage = "PLAY_INTEGRITY_FAILED: " + exception.getMessage();
+            }
+            Log.e("Speaker", errorMessage, exception);
+            callbackContext.error(errorMessage);
         });
     }
+
     @Override
     protected void pluginInitialize() {
         super.pluginInitialize();
@@ -82,12 +101,14 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
         };
         handler.post(checkFileIntegrityRunnable);
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         // Remove callbacks to stop periodic checks when the plugin is destroyed
         handler.removeCallbacks(checkFileIntegrityRunnable);
     }
+
     private void getToken(long projectNumber, String hashedNonce, CallbackContext callbackContext) {
         Context context = this.cordova.getActivity().getApplicationContext();
         // Create an instance of a manager.
@@ -102,6 +123,7 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
             callbackContext.success(integrityTokenResponse1.token());
         });
     }
+
     private String getFileChecksum(MessageDigest digest, InputStream fis) throws Exception {
         // Create byte array to read data in chunks
         byte[] byteArray = new byte[1024];
@@ -122,8 +144,9 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
         // Return complete hash
         return sb.toString();
     }
-    
-    private String decryptChecksum(String encryptedData, String authTag, String keyBase64, String ivBase64) throws Exception {
+
+    private String decryptChecksum(String encryptedData, String authTag, String keyBase64, String ivBase64)
+            throws Exception {
         int GCM_TAG_LENGTH = 16; // 128 bits
         // Decode the key, IV, encrypted data, and auth tag from Base64
         byte[] key = Base64.getDecoder().decode(keyBase64);
@@ -171,6 +194,7 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
             callbackContext.error("Error checking file integrity: " + e.getMessage());
         }
     }
+
     private void closeApp() {
         Activity activity = cordova.getActivity();
         activity.runOnUiThread(() -> {
@@ -189,7 +213,8 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
         try {
             // Load the ps-config.json file
             InputStream configInputStream = cordova.getActivity().getAssets().open("www/ps-config.json");
-            BufferedReader reader = new BufferedReader(new InputStreamReader(configInputStream, StandardCharsets.UTF_8));
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(configInputStream, StandardCharsets.UTF_8));
             StringBuilder configStringBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -216,7 +241,7 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
             // Decrypt the checksum
             String key = "xNRxA48aNYd33PXaODSutRNFyCu4cAe/InKT/Rx+bw0=";
             String iv = "81dFxOpX7BPG1UpZQPcS6w==";
-            //String authTag = "2NL/II67730bqC8EBMTBeg==";
+            // String authTag = "2NL/II67730bqC8EBMTBeg==";
 
             String expectedChecksum = decryptChecksum(encryptedChecksum, authTag, key, iv);
             // Get the list of files in the 'www' directory
@@ -239,9 +264,12 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
 
             // Log the found file path to JavaScript console
             String finalFoundFilePath = foundFilePath;
-            /*cordova.getActivity().runOnUiThread(() -> {
-                webView.loadUrl("javascript:console.log('Found file path: " + finalFoundFilePath + "');");
-            });*/
+            /*
+             * cordova.getActivity().runOnUiThread(() -> {
+             * webView.loadUrl("javascript:console.log('Found file path: " +
+             * finalFoundFilePath + "');");
+             * });
+             */
 
             InputStream fileInputStream = cordova.getActivity().getAssets().open(foundFilePath);
 
@@ -255,9 +283,11 @@ public class CordovaPluginSpeaker extends CordovaPlugin {
             String checksum = getFileChecksum(digest, fileInputStream);
 
             // Log checksum to JavaScript console
-            /*cordova.getActivity().runOnUiThread(() -> {
-                webView.loadUrl("javascript:console.log('Checksum: " + checksum + "');");
-            });*/
+            /*
+             * cordova.getActivity().runOnUiThread(() -> {
+             * webView.loadUrl("javascript:console.log('Checksum: " + checksum + "');");
+             * });
+             */
 
             if (!checksum.equals(expectedChecksum)) {
                 // Close the app if the integrity check fails
